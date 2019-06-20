@@ -47,6 +47,7 @@ th {
 <table>
 <thead>
 	<tr>
+		<th>Database</th>
 		<th>Log table</th>
 		<th>Native audit trail enabled</th>
 	</tr>
@@ -54,6 +55,7 @@ th {
 <tbody>
 {% for table in audit_log_tables %}
 	<tr>
+		<td>{{ table.database }}</td>
 		<td>{{ table.name }}</td>
 		<td>{{ 'yes' if table.native_audit_trail else 'no' }}</td>
 	</tr>

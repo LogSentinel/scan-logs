@@ -40,7 +40,7 @@ def handle_mysql(username, password):
             tables = cursor.fetchall()
             for table in tables:
                 if is_audit_table(table[0]):
-                    audit_tables.append(database[0] + "." + table[0])
+                    audit_tables.append({"name": table[0], "database": database[0], "native_audit_trail": False})
 
         return audit_tables
     except SystemExit as e:
@@ -61,7 +61,7 @@ def handle_postgres(username, password):
 
         for table in tables:
             if is_audit_table(table[1]):
-                audit_tables.append(tables[0] + "." + table[1])
+                audit_tables.append({"name": table[1], "database": table[0], "native_audit_trail": False})
 
     except SystemExit as e:
         pass
@@ -75,14 +75,8 @@ def handle_oracle(username, password):
        service = raw_input("Enter Oracle service name: ")
        port = raw_input("Enter Oracle port: ")
        connection = cx_Oracle.connect(username + "/" + password + "@localhost:" + port + "/" + service, mode=cx_Oracle.SYSDBA)
-       audit_tables = []
        cursor = connection.cursor()
-       cursor.execute("SELECT DISTINCT OWNER, OBJECT_NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'TABLE'")
-       tables = cursor.fetchall()
-       for table in tables:
-           if is_audit_table(table[1]):
-               audit_tables.append(tables[0] + "." + table[1])
-
+	   
        cursor.execute("SELECT COUNT(*) FROM DBA_AUDIT_TRAIL")
        count = cursor.fetchone()
 
@@ -90,7 +84,14 @@ def handle_oracle(username, password):
        if count[0] > 0:
            audit_trail_enabled = True
 
-       return (audit_tables, audit_trail_enabled)
+       audit_tables = []
+       cursor.execute("SELECT DISTINCT OWNER, OBJECT_NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'TABLE'")
+       tables = cursor.fetchall()
+       for table in tables:
+           if is_audit_table(table[1]):
+               audit_tables.append({"name": table[1], "database": table[0], "native_audit_trail": audit_trail_enabled})
+
+       return audit_tables
    except SystemExit as e:
        pass
 
@@ -98,7 +99,9 @@ def is_audit_table(name):
     return name.endswith("log") or "audit" in name or "trail" in name
 
 def is_critical(log_file):
-	return False
+    if "secure" in log_file or "audit" in log_file:
+        return True
+    return False
 
 def install_package(package):
     subprocess.call([sys.executable, "-m", "pip", "install", package])
@@ -170,9 +173,8 @@ for db in running_databases:
         tables = handle_postgres(username, password)
         audit_tables.extend(tables)
     if db == "oracle":
-        (tables, audit_log_enabled) = handle_oracle(username, password)
+        tables = handle_oracle(username, password)
         audit_tables.extend(tables)
-        print("Oracle audit log enabled: " + str(audit_log_enabled))
 
 #------------
 
@@ -184,8 +186,8 @@ f.close()
 
 template = Template(template_text)
 report = template.render(audit_logs = list(map(lambda f: {"path": f, "critical": is_critical(f)}, log_files)), 
-	audit_log_tables = list(map(lambda t: {"name": t, "native_audit_trail": False}, audit_tables)), 
-	log_collectors = log_collectors)
+    audit_log_tables = audit_tables, 
+    log_collectors = log_collectors)
 
 d = datetime.datetime.today()
 
