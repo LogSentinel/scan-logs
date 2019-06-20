@@ -1,0 +1,68 @@
+<html>
+<head>
+<title>Logging report by LogSentinel</title>
+<style type="text/css">
+table {
+    border-collapse: collapse;
+    border: 2px solid;
+    letter-spacing: 1px;
+    font-family: sans-serif;
+    font-size: .8rem;
+	width: 80%;
+	margin-bottom: 20px;
+}
+
+h1 {
+	font-family: sans-serif;
+}
+td, th {
+    border: 1px solid;
+    padding: 5px 10px;
+}
+th {
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>Detected log files</h1>
+<table>
+<thead>
+	<tr>
+		<th>Log file</th>
+		<th>Critical</th>
+	</tr>
+</thead>
+<tbody>
+{% for audit_log in audit_logs %}
+	<tr>
+		<td>{{ audit_log.path }}</td>
+		<td>{{ 'yes' if audit_log.critical else 'no' }}</td>
+	</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h1>Detected database audit logs</h1>
+<table>
+<thead>
+	<tr>
+		<th>Log table</th>
+		<th>Native audit trail enabled</th>
+	</tr>
+</thead>
+<tbody>
+{% for table in audit_log_tables %}
+	<tr>
+		<td>{{ table.name }}</td>
+		<td>{{ 'yes' if table.native_audit_trail else 'no' }}</td>
+	</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h1>Detected log collectors</h1>
+{% for collector in log_collectors %} {{ collector }} {% endfor %}
+
+</body>
+</html>
