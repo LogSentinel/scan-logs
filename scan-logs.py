@@ -76,19 +76,19 @@ def handle_oracle(username, password):
        port = raw_input("Enter Oracle port: ")
        connection = cx_Oracle.connect(username + "/" + password + "@localhost:" + port + "/" + service, mode=cx_Oracle.SYSDBA)
        cursor = connection.cursor()
-	   
-       cursor.execute("SELECT COUNT(*) FROM DBA_AUDIT_TRAIL")
-       count = cursor.fetchone()
-
-       audit_trail_enabled = False
-       if count[0] > 0:
-           audit_trail_enabled = True
 
        audit_tables = []
        cursor.execute("SELECT DISTINCT OWNER, OBJECT_NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'TABLE'")
        tables = cursor.fetchall()
        for table in tables:
-           if is_audit_table(table[1]):
+       
+            cursor.execute('SELECT COUNT(*) FROM DBA_AUDIT_TRAIL WHERE OBJ_NAME="' + table + '"')
+            count = cursor.fetchone()
+            audit_trail_enabled = False
+            if count[0] > 0:
+                audit_trail_enabled = True
+                
+            if is_audit_table(table[1]) or audit_trail_enabled:
                audit_tables.append({"name": table[1], "database": table[0], "native_audit_trail": audit_trail_enabled})
 
        return audit_tables
