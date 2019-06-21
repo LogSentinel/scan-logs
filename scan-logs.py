@@ -33,7 +33,7 @@ def handle_mysql(username, password):
         cursor.execute("SHOW DATABASES")
         databases = cursor.fetchall()
         for database in databases:
-            if database[0] == "information_schema":
+            if database[0] == "information_schema" or database[0] == "mysql":
                 continue
 
             cursor.execute("SHOW TABLES IN " + database[0])
@@ -183,7 +183,9 @@ template_text = f.read()
 f.close()
 
 template = Template(template_text)
-report = template.render(audit_logs = list(map(lambda f: {"path": f, "critical": is_critical(f)}, log_files)), 
+audit_log_files = list(map(lambda f: {"path": f, "critical": is_critical(f)}, log_files))
+
+report = template.render(audit_logs = audit_log_files, 
     audit_log_tables = audit_tables, 
     log_collectors = log_collectors)
 

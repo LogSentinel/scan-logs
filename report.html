@@ -65,6 +65,8 @@ th {
 
 <h1>Detected log collectors</h1>
 {% for collector in log_collectors %} {{ collector }} {% endfor %}
-
+{% if not log_collectors %}
+No log collectors detected
+{% endif %}
 </body>
 </html>
