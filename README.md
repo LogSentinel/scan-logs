@@ -8,6 +8,12 @@ The scan-logs script does the following:
 
 Invoking the script:
 
+There are two ways to invoke the script. The easiest one is to download the scan-logs.sh shell script and simply run it:
+
+    > sudo scan-logs.sh
+
+If you already have pip installed, you can download the python script and the html report templace and run it as follows:
+
     > sudo python scan-logs.py 
 
 After running the script, an HTML report is generated in the current folder.

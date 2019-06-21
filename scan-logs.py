@@ -106,8 +106,6 @@ def is_critical(log_file):
 def install_package(package):
     subprocess.call([sys.executable, "-m", "pip", "install", package])
 
-# TODO: install pip curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py python get-pip.py
-# Make a bash script that curl gets this script, then installs pip, then calls this script
 
 path = "/"
 
