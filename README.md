@@ -9,3 +9,5 @@ The scan-logs script does the following:
 Invoking the script:
 
     > sudo python scan-logs.py 
+
+After running the script, an HTML report is generated in the current folder.
